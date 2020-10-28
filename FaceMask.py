@@ -26,7 +26,7 @@ MASK = 0
 check1 = 0
 check2 = 0
 Access = False
-Deny = False
+Acceso = str
 
 
 sess, graph = load_tf_model('models/face_mask_detection.pb')
@@ -107,23 +107,29 @@ def getTemp():
     OT = (OT/20)+3.5
     return OT
 
-def date_now():
+def Fecha():
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     today = str(today)
     return today
 
-def time_now():
+def Hora():
     now = datetime.datetime.now().strftime("%H:%M:%S")
     now = str(now)
     return now
 
-def getMask():
-    
+def Mascarilla():
+    global MASK
+    if MASK ==1:
+        mask = 'Yes'
+    else:
+        mask = 'No'
+    return mask
 
 def CSV():
     with open('/home/pi/Desktop/Apli2/Results.csv',mode='a')as results_read:
         results_write=csv.writer(results_read,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
-        
+        write_log=results_write.writerow([Fecha(),Hora(),getTemp(),Mascarilla(),Acceso])
+        return write_log
 
 cap = WebcamVideoStream(src=0).start()
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -141,6 +147,8 @@ while status:
         check1 = check1 + 1
         check2 = 0
         if check1 == 3:
+            Acceso = 'Yes'
+            CSV()
             Access = True
             check1 = 0
     elif(getTemp()< 35):
@@ -148,36 +156,32 @@ while status:
         GPIO.output(21,False)
         check1 = 0
         check2 = 0
+        Access = False
     elif(getTemp()> 42):
         GPIO.output(20,False)
         GPIO.output(21,False)
         check1 = 0
         check2 = 0
+        Access = False
     else:
         GPIO.output(21,True)
         GPIO.output(20,False)
         check1 = 0
         check2 = check2 + 1
         if check2 == 3:
-            Deny = True
+            Acceso = 'No'
+            CSV()
             check2 = 0
     # chequeo de datos y activa dispensador
-    if Access :
-       Dispensador = GPIO.input(24)
-       while (Access):
-           if Dispensador == 0:
-               GPIO.output(16,True)
-               sleep(0.4)
-               GPIO.output(16,False)
-               sleep(3)
-            
-        Access = False
-    elif Deny:
-    #No se activa el dispensador, pero apunta que no se permitio el ingreso
-        while Deny:
-    # Apuntar Hora, Fecha, Temp, Mascarilla, Acceso.
-        Deny = False
-    
+    while Access :
+        Dispensador = GPIO.input(24)
+        if Dispensador == 0:
+            GPIO.output(16,True)
+            sleep(0.4)
+            GPIO.output(16,False)
+            sleep(3)
+            Access = False
+        
     cv2.imshow('Mask Detector',img_raw)
     cv2.waitKey(1)
 

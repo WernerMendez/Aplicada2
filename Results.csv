@@ -1,1 +1,4 @@
-Date,Hour,Temp,Mask,Access
+Fecha,Hora,Temperatura(C),Mascarilla,Acceso
+2020-10-23,18:24:42,35.55,Yes,Yes
+2020-10-27,18:20:46,35.110000000000014,No,No
+2020-10-27,18:22:48,35.190000000000055,No,No
