@@ -176,10 +176,10 @@ while status:
     while Access :
         Dispensador = GPIO.input(24)
         if Dispensador == 0:
-            GPIO.output(16,True)
-            sleep(0.4)
             GPIO.output(16,False)
-            sleep(3)
+            sleep(0.1)
+            GPIO.output(16,True)
+            sleep(4)
             Access = False
         
     cv2.imshow('Mask Detector',img_raw)
